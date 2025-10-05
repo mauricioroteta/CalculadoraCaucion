@@ -1,0 +1,16 @@
+[
+  {
+    "applicationId": "151547",
+    "id": "884269",
+    "cuit": "20-12345678-9",
+    "name": "ACUÑA JUAN PABLO",
+    "province": "Buenos Aires"
+  },
+  {
+    "applicationId": "987654",
+    "id": "112233",
+    "cuit": "27-87654321-0",
+    "name": "MARIA GONZALEZ",
+    "province": "Santa Fe"
+  }
+]

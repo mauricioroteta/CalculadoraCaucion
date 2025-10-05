@@ -1,0 +1,5 @@
+{
+  "name": "Cotizador de Póliza de Caución",
+  "description": "Una aplicación para cotizar pólizas de seguro de caución, calculando primas, impuestos y el premio final basado en la suma asegurada y la duración.",
+  "requestFramePermissions": []
+}

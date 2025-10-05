@@ -1,0 +1,20 @@
+{
+  "151547": {
+    "primaTarifa": 361200.00,
+    "bonificacionPct": 0.00,
+    "recAdministrativoPct": 8.20,
+    "recFinancieroPct": 0.00,
+    "derEmision": 26400.00,
+    "gastosEscribania": 0.00,
+    "impuestos": 98740.57
+  },
+  "987654": {
+    "primaTarifa": 500000.00,
+    "bonificacionPct": 5.00,
+    "recAdministrativoPct": 10.00,
+    "recFinancieroPct": 1.50,
+    "derEmision": 30000.00,
+    "gastosEscribania": 5000.00,
+    "impuestos": 150000.00
+  }
+}

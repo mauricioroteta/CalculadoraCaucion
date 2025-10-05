@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-3xl mx-auto p-6">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100">
+      <header class="bg-gradient-to-r from-red-500 to-red-800 p-6 rounded-t-2xl flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-white tracking-tight">Caución</h1>
+        <span class="text-lg font-light text-blue-100">Cotizador</span>
+      </header>
+      <main class="p-6 space-y-8">
+        <section class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="flex flex-col">
+              <label for="solicitud" class="block text-xs font-semibold text-gray-600 mb-2">Nro. Solicitud</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 0 0 2 2h14V5H5a2 2 0 0 0-2 2z"></path></svg>
+                </span>
+                <input id="solicitud" type="text" [value]="applicationId()" (input)="onApplicationIdChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="Ingrese nro. de solicitud">
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <label for="suma-asegurada" class="block text-xs font-semibold text-gray-600 mb-2">Suma Asegurada / Premio</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$
+                </span>
+                <input id="suma-asegurada" type="number" [value]="insuredAmount() || ''" (input)="onInsuredAmountChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="0.00">
+              </div>
+            </div>
+            <div class="flex flex-col">
+              <label for="meses" class="block text-xs font-semibold text-gray-600 mb-2">Cantidad de Meses</label>
+              <input id="meses" type="number" [value]="months() || ''" (input)="onMonthsChange($event)" (keydown.enter)="calculateQuote()" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="12">
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <button (click)="fetchPolicyHolder()" [disabled]="isLoadingPolicyHolder() || !insuredAmount() || !months()" class="inline-flex items-center gap-3 bg-white border border-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-lg shadow-sm hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+              @if (isLoadingPolicyHolder()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Buscando...</span>
+              } @else {
+                <span>Buscar Tomador</span>
+              }
+            </button>
+          </div>
+          @if (policyHolderError()) {
+            <div class="text-sm text-red-600 bg-red-50 p-3 rounded-md">{{ policyHolderError() }}</div>
+          }
+          @if (policyHolder(); as holder) {
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-md text-sm">
+              <div><span class="font-semibold text-gray-600">Tomador ID: </span> <span class="text-gray-800">{{ holder.id }}</span></div>
+              <div><span class="font-semibold text-gray-600">Nombre: </span> <span class="text-gray-800">{{ holder.name }}</span></div>
+              <div><span class="font-semibold text-gray-600">Provincia: </span> <span class="text-gray-800">{{ holder.province }}</span></div>
+            </div>
+            <div class="mt-4">
+              <label for="tipo-alquiler" class="block text-xs font-semibold text-gray-600 mb-2">Tipo de Alquiler</label>
+              <select id="tipo-alquiler" [value]="rentalType() || 'F'" (change)="onRentalTypeChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+                <option value="F">Vivienda Familiar</option>
+                <option value="U">Universitarios</option>
+                <option value="C">Comercial</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-3 lg:col-span-1">
+              <label for="cuotas" class="block text-xs font-semibold text-gray-600 mb-2">Cuotas</label>
+              <div>
+                <select id="cuotas" [value]="cuotas() || 1" (change)="onCuotasChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+                  <option value="1">1 cuota</option>
+                  <option value="3">3 cuotas</option>
+                  <option value="6">6 cuotas</option>
+                  <option value="9">9 cuotas</option>
+                  <option value="12">12 cuotas</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 bg-white p-4 rounded-md text-sm shadow-sm">
+              <div><span class="font-semibold text-gray-600">item A: </span> <span class="text-gray-800">{{ holder.itemA }}</span></div>
+              <div><span class="font-semibold text-gray-600">item B: </span> <span class="text-gray-800">{{ holder.itemB }}</span></div>
+              <div><span class="font-semibold text-gray-600">item C: </span> <span class="text-gray-800">{{ holder.itemC }}</span></div>
+              <div><span class="font-semibold text-gray-600">item D: </span> <span class="text-gray-800">{{ holder.itemD }}</span></div>
+              <div><span class="font-semibold text-gray-600">item E: </span> <span class="text-gray-800">{{ holder.itemE }}</span></div>
+            </div>
+          }
+        </section>
+        @if(policyHolder()) {
+          <section class="space-y-6">
+            <div class="flex items-center justify-end gap-4">
+              <button (click)="resetQuote()" type="button" class="text-sm font-medium text-gray-600 hover:text-gray-800">Limpiar</button>
+              <button (click)="calculateQuote()" [disabled]="isLoadingQuote()" class="inline-flex items-center gap-3 bg-red-500 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+                @if(isLoadingQuote()) {
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Calculando...</span>
+                } @else {
+                  <span>Calcular</span>
+                }
+              </button>
+            </div>
+            @if (calculationError()) {
+              <div class="text-sm text-red-600 bg-red-50 p-3 rounded-md">{{ calculationError() }}</div>
+            }
+          </section>
+        }
+        @if (quoteResult(); as quote) {
+          <section class="border-t border-gray-200 pt-6">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 font-sans">Resultado de la Cotización</h3>
+            <div class="mt-4 max-w-lg mx-auto space-y-1 text-sm font-mono">
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">SumaAsegurada</span>
+                <span class="text-gray-800 text-right">{{ quote.sumaAsegurada | number:'1.2-2' }}</span>
+              </div>
+              <hr class="my-1 border-gray-300">
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5">
+                <span class="text-gray-600 font-sans">Prima Tarifa</span>
+                <span class="w-28"></span>
+                <span class="text-gray-800 text-right">{{ quote.primaTarifa | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">Bonificación (BO)</span>
+                <span class="bg-gray-100 px-2 py-1 rounded text-right w-28">{{ quote.bonificacionPct | number:'1.2-2' }} %</span>
+                <span class="text-gray-800 text-right">{{ quote.bonificacion | number:'1.2-2' }}</span>
+              </div>
+              <hr class="my-1 border-gray-300">
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 font-semibold">
+                <span class="text-gray-800 font-sans">Prima Neta (PA)</span>
+                <span class="w-28"></span>
+                <span class="text-gray-900 text-right">{{ quote.primaNeta | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">Rec. Administrativo (RA)</span>
+                <span class="bg-gray-100 px-2 py-1 rounded text-right w-28">{{ quote.recAdministrativoPct | number:'1.2-2' }} %</span>
+                <span class="text-gray-800 text-right">{{ quote.recAdministrativo | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">Rec. Financiero (RF)</span>
+                <span class="bg-gray-100 px-2 py-1 rounded text-right w-28">{{ quote.recFinancieroPct | number:'1.2-2' }} %</span>
+                <span class="text-gray-800 text-right">{{ quote.recFinanciero | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">Der. de Emisión (DE)</span>
+                <span class="w-28"></span>
+                <span class="text-gray-800 text-right">{{ quote.derEmision | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 pl-4">
+                <span class="text-gray-600 font-sans">Gastos Escribanía (OT)</span>
+                <span class="w-28"></span>
+                <span class="text-gray-800 text-right">{{ quote.gastosEscribania | number:'1.2-2' }}</span>
+              </div>
+              <hr class="my-1 border-gray-300">
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 font-semibold">
+                <span class="text-gray-800 font-sans">Subtotal</span>
+                <span class="w-28"></span>
+                <span class="text-gray-900 text-right">{{ quote.subtotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5">
+                <span class="text-gray-600 font-sans">Impuestos</span>
+                <span class="w-28"></span>
+                <span class="text-gray-800 text-right">{{ quote.impuestos | number:'1.2-2' }}</span>
+              </div>
+              <!-- Detalle de impuestos -->
+              <div *ngIf="quote.detalleImpuestos && quote.detalleImpuestos.length > 0" class="mt-4">
+                <h4 class="text-sm font-medium text-gray-800 mb-2">Detalle de impuestos</h4>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left border-collapse">
+                    <thead>
+                      <tr class="text-xs text-gray-500">
+                        <th class="py-1 px-2">Código</th>
+                        <th class="py-1 px-2 text-right">Base</th>
+                        <th class="py-1 px-2 text-right">Alic.</th>
+                        <th class="py-1 px-2 text-right">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let imp of quote.detalleImpuestos" class="border-t border-gray-100">
+                        <td class="py-2 px-2 text-gray-700">{{ imp.impCod }}</td>
+                        <td class="py-2 px-2 text-right">{{ imp.base | number:'1.2-2' }}</td>
+                        <td class="py-2 px-2 text-right">{{ imp.alicuota | number:'1.2-2' }} %</td>
+                        <td class="py-2 px-2 text-right">{{ imp.importe | number:'1.2-2' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <hr class="my-1 border-gray-300">
+              <div class="flex justify-between items-center py-3 bg-red-100 px-2 rounded-md mt-2">
+                <span class="text-base font-bold text-red-800 tracking-wide font-sans">PREMIO (PO)</span>
+                <span class="text-base font-bold text-red-900">{{ quote.premio | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </section>
+        }
+      </main>
+    </div>
+  </div>
+</div>
