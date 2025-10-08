@@ -18,7 +18,7 @@
               </div>
             </div>
             <div class="flex flex-col">
-              <label for="suma-asegurada" class="block text-xs font-semibold text-gray-600 mb-2">Suma Asegurada / Premio</label>
+              <label for="suma-asegurada" class="block text-xs font-semibold text-gray-600 mb-2">Suma Asegurada</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$
                 </span>
@@ -26,12 +26,27 @@
               </div>
             </div>
             <div class="flex flex-col">
-              <label for="meses" class="block text-xs font-semibold text-gray-600 mb-2">Cantidad de Meses</label>
-              <input id="meses" type="number" [value]="months() || ''" (input)="onMonthsChange($event)" (keydown.enter)="calculateQuote()" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="12">
+              <label for="expensas-mensuales" class="block text-xs font-semibold text-gray-600 mb-2">Expensas Mensuales</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$
+                </span>
+                <input id="expensas-mensuales" type="number" [value]="monthlyExpenses() || ''" (input)="onMonthlyExpensesChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="0.00">
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div class="flex flex-col">
+              <label for="fecha-desde" class="block text-xs font-semibold text-gray-600 mb-2">Fecha Desde</label>
+              <input id="fecha-desde" type="date" [value]="fromDate()" (input)="onFromDateChange($event)" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+            </div>
+            <div class="flex flex-col">
+              <label for="fecha-hasta" class="block text-xs font-semibold text-gray-600 mb-2">Fecha Hasta</label>
+              <input id="fecha-hasta" type="date" [value]="toDate()" (input)="onToDateChange($event)" (keydown.enter)="calculateQuote()" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
             </div>
           </div>
           <div class="flex justify-end mt-4">
-            <button (click)="fetchPolicyHolder()" [disabled]="isLoadingPolicyHolder() || !insuredAmount() || !months()" class="inline-flex items-center gap-3 bg-white border border-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-lg shadow-sm hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button (click)="fetchPolicyHolder()" [disabled]="isLoadingPolicyHolder() || !insuredAmount() || !fromDate() || !toDate()" class="inline-flex items-center gap-3 bg-white border border-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-lg shadow-sm hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
               @if (isLoadingPolicyHolder()) {
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -187,6 +202,15 @@
               <div class="flex justify-between items-center py-3 bg-red-100 px-2 rounded-md mt-2">
                 <span class="text-base font-bold text-red-800 tracking-wide font-sans">PREMIO (PO)</span>
                 <span class="text-base font-bold text-red-900">{{ quote.premio | number:'1.2-2' }}</span>
+              </div>
+              <!-- Mostrar valor por cuota cuando cuotas > 1 -->
+              <div *ngIf="cuotas() > 1" class="flex justify-between items-center py-2 bg-blue-50 px-2 rounded-md mt-1">
+                <span class="text-sm font-medium text-blue-700 tracking-wide font-sans">
+                  Valor por cuota ({{ cuotas() }} cuotas)
+                </span>
+                <span class="text-sm font-semibold text-blue-800">
+                  {{ quote.premio / cuotas() | number:'1.2-2' }}
+                </span>
               </div>
             </div>
           </section>

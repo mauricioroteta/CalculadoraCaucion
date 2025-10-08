@@ -48,8 +48,9 @@ export class PolicyService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-async getPolicyHolder(applicationId: string, insuredAmount: number, months: number): Promise<PolicyHolder> {
-    const API_URL = `http://localhost:8000/policyholder/${applicationId}/${insuredAmount}/${months}`;
+async getPolicyHolder(applicationId: string, insuredAmount: number, days: number): Promise<PolicyHolder> {
+    // We pass days directly instead of months now
+    const API_URL = `http://localhost:8000/policyholder/${applicationId}/${insuredAmount}/${days}`;
     console.log(API_URL)
     
     try {
@@ -79,23 +80,32 @@ async getPolicyHolder(applicationId: string, insuredAmount: number, months: numb
     }
 }
 
-async calculateQuote(applicationId: string, premio: number, meses: number, rentalType?: string, cuotas?: number): Promise<QuoteDetails> {
+async calculateQuote(applicationId: string, totalAmount: number, days: number, rentalType?: string, cuotas?: number): Promise<QuoteDetails> {
   await this.delay(800); // Simula latencia de red
-  // meses -> dias para la API (usar entero; FastAPI espera un int en la ruta)
-  const dias = Math.round((meses / 12) * 365);
-  // suma asegurada total = premio * cantidad de meses
-  const sumaTotal = premio * meses;
+  
+  // Days are already calculated in component, pass directly
+  const dias = days;
+  
+  // totalAmount already includes insuredAmount + monthlyExpenses
+  const premio = totalAmount;
+  
+  // Calculate estimated months based on days for sumaTotal (for backward compatibility)
+  const estimatedMonths = Math.round(days / 30);
+  const sumaTotal = premio * estimatedMonths;
+  
   // incluir tipo de alquiler (F/U/C) si se provee
   const tipo = rentalType ? `/${rentalType}` : '';
+  
   // incluir cuotas si se proveyeron
   const cuotasSeg = cuotas ? `/${cuotas}` : '';
+  
   const response = await fetch(`http://localhost:8000/recotizar2/${applicationId}/${premio}/${dias}/${sumaTotal}${cuotasSeg}${tipo}`);
-    //const response = await fetch(`http://localhost:8000/quote/${applicationId}/516000/730`);
-    if (!response.ok) {
-      throw new Error('No se pudo cargar el archivo de cotizaciones.');
-    }
+  
+  if (!response.ok) {
+    throw new Error('No se pudo cargar el archivo de cotizaciones.');
+  }
 
-    const quoteParams = await response.json();
-    return quoteParams as QuoteDetails;
+  const quoteParams = await response.json();
+  return quoteParams as QuoteDetails;
 }
 }
